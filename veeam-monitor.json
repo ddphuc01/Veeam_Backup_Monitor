@@ -1,0 +1,107 @@
+{
+  "title": "Veeam Backup Monitor",
+  "uid": "veeam-backup-monitor",
+  "version": 1,
+  "schemaVersion": 38,
+  "refresh": "5m",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Tổng số Jobs",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_job\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> count()\n  |> yield(name: \"total\")"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Jobs Thành công",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "thresholds": { "steps": [{ "color": "green", "value": null }] }
+      },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_job\")\n  |> filter(fn: (r) => r.last_result == \"Success\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> count()"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Jobs Cảnh báo",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "thresholds": { "steps": [{ "color": "orange", "value": null }] }
+      },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_job\")\n  |> filter(fn: (r) => r.last_result == \"Warning\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> count()"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Jobs Thất bại",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "thresholds": { "steps": [{ "color": "red", "value": null }] }
+      },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_job\")\n  |> filter(fn: (r) => r.last_result == \"Failed\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> count()"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Trạng thái tất cả Jobs",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 4, "w": 16, "h": 8 },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_job\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> last()\n  |> keep(columns: [\"job_name\", \"job_type\", \"last_result\", \"_value\", \"_time\"])"
+      }]
+    },
+    {
+      "id": 6,
+      "title": "Dung lượng Repository",
+      "type": "bargauge",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 },
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"veeam_repository\")\n  |> filter(fn: (r) => r._field == \"used_percent\")\n  |> last()\n  |> group(columns: [\"repo_name\"])"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "Lịch sử Session theo thời gian",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 18, "w": 24, "h": 8 },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "influxdb" },
+        "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"veeam_session\")\n  |> filter(fn: (r) => r._field == \"status_code\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)"
+      }]
+    }
+  ]
+}

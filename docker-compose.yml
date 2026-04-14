@@ -1,0 +1,106 @@
+version: "3.8"
+
+networks:
+  veeam-monitor:
+    driver: bridge
+
+volumes:
+  influxdb-data:
+  influxdb-config:
+  grafana-data:
+
+services:
+
+  # ============================================================
+  # InfluxDB - Time Series Database
+  # ============================================================
+  influxdb:
+    image: influxdb:2.7
+    container_name: veeam-influxdb
+    restart: unless-stopped
+    networks:
+      - veeam-monitor
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USERNAME:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD:-Admin@123456}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG:-veeam-org}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET:-veeam}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ============================================================
+  # Grafana - Dashboard & Visualization
+  # ============================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: veeam-grafana
+    restart: unless-stopped
+    networks:
+      - veeam-monitor
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-Admin@123456}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-localhost}
+      - GF_SMTP_ENABLED=false
+      # InfluxDB connection cho provisioning
+      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_ORG=${INFLUX_ORG:-veeam-org}
+      - INFLUX_BUCKET=${INFLUX_BUCKET:-veeam}
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ============================================================
+  # Veeam Collector - Python script thu thập data từ Veeam API
+  # ============================================================
+  veeam-collector:
+    build:
+      context: ./collector
+      dockerfile: Dockerfile
+    container_name: veeam-collector
+    restart: unless-stopped
+    networks:
+      - veeam-monitor
+    environment:
+      # --- Veeam Server ---
+      - VEEAM_HOST=${VEEAM_HOST:-https://192.168.1.10:9419}
+      - VEEAM_USER=${VEEAM_USER:-Administrator}
+      - VEEAM_PASS=${VEEAM_PASS:-YourVeeamPassword}
+      # --- InfluxDB ---
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - INFLUX_ORG=${INFLUX_ORG:-veeam-org}
+      - INFLUX_BUCKET=${INFLUX_BUCKET:-veeam}
+      # --- Interval (giây) ---
+      - COLLECT_INTERVAL=${COLLECT_INTERVAL:-300}
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    volumes:
+      - ./collector/logs:/app/logs
