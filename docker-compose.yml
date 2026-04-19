@@ -59,7 +59,9 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-Admin@123456}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-localhost}
+      - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-0.0.0.0}
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
       - GF_SMTP_ENABLED=false
       # InfluxDB connection cho provisioning
       - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
