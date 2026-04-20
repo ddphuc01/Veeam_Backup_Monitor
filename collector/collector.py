@@ -49,7 +49,7 @@ log = logging.getLogger(__name__)
 class VeeamAPI:
     def __init__(self):
         self.token = None
-        self.headers = {"x-api-version": "1.1"}
+        self.headers = {"x-api-version": "1.0-rev1"}
         self.session = requests.Session()
         self.session.verify = False
 
