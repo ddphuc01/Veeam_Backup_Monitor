@@ -10,10 +10,6 @@ volumes:
   grafana-data:
 
 services:
-
-  # ============================================================
-  # InfluxDB - Time Series Database
-  # ============================================================
   influxdb:
     image: influxdb:2.7
     container_name: veeam-influxdb
@@ -31,7 +27,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD:-Admin@123456}
       - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG:-veeam-org}
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET:-veeam}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token-change-me}
       - DOCKER_INFLUXDB_INIT_RETENTION=30d
     healthcheck:
       test: ["CMD", "influx", "ping"]
@@ -40,9 +36,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # ============================================================
-  # Grafana - Dashboard & Visualization
-  # ============================================================
   grafana:
     image: grafana/grafana:latest
     container_name: veeam-grafana
@@ -60,11 +53,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-Admin@123456}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_HTTP_ADDR=0.0.0.0
-      - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-192.168.5.99}
-      - GF_SERVER_ROOT_URL=http://${GRAFANA_DOMAIN:-192.168.5.99}:3000/
-      - GF_SMTP_ENABLED=false
-      # InfluxDB connection cho provisioning
-      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-192.168.4.2}
+      - GF_SERVER_ROOT_URL=http://${GRAFANA_DOMAIN:-192.168.4.2}:3000/
+      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token-change-me}
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_ORG=${INFLUX_ORG:-veeam-org}
       - INFLUX_BUCKET=${INFLUX_BUCKET:-veeam}
@@ -78,9 +69,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # ============================================================
-  # Veeam Collector - Python script thu thập data từ Veeam API
-  # ============================================================
   veeam-collector:
     build:
       context: ./collector
@@ -91,16 +79,16 @@ services:
       - veeam-monitor
     environment:
       # --- Veeam Server ---
-      - VEEAM_HOST=${VEEAM_HOST:-https://192.168.1.10:9419}
-      - VEEAM_USER=${VEEAM_USER:-Administrator}
-      - VEEAM_PASS=${VEEAM_PASS:-YourVeeamPassword}
+      - VEEAM_HOST=${VEEAM_HOST:-https://192.168.4.2:9419}
+      - VEEAM_USER=${VEEAM_USER:-svc_veeam_monitor}
+      - VEEAM_PASS=${VEEAM_PASS}  # ← Bắt buộc điền trong .env
       # --- InfluxDB ---
       - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token}
+      - INFLUX_TOKEN=${INFLUX_TOKEN:-veeam-super-secret-token-change-me}
       - INFLUX_ORG=${INFLUX_ORG:-veeam-org}
       - INFLUX_BUCKET=${INFLUX_BUCKET:-veeam}
-      # --- Interval (giây) ---
-      - COLLECT_INTERVAL=${COLLECT_INTERVAL:-300}
+      # --- Interval ---
+      - COLLECT_INTERVAL=${COLLECT_INTERVAL:-120}
     depends_on:
       influxdb:
         condition: service_healthy

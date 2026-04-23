@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Veeam Backup & Replication - Metrics Collector
-Thu thập data từ Veeam REST API và ghi vào InfluxDB
+Veeam Backup & Replication - Metrics Collector (FIXED)
+Thu thập data từ Veeam REST API v1-rev1 và ghi vào InfluxDB
 """
 
 import os
@@ -19,14 +19,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ============================================================
 # Config từ environment variables
 # ============================================================
-VEEAM_HOST     = os.getenv("VEEAM_HOST", "https://192.168.1.10:9419")
-VEEAM_USER     = os.getenv("VEEAM_USER", "Administrator")
-VEEAM_PASS     = os.getenv("VEEAM_PASS", "password")
+VEEAM_HOST = os.getenv("VEEAM_HOST", "https://192.168.4.2:9419")  # ← Cập nhật IP của bạn
+VEEAM_USER = os.getenv("VEEAM_USER", "svc_veeam_monitor")
+VEEAM_PASS = os.getenv("VEEAM_PASS", "")
 
-INFLUX_URL     = os.getenv("INFLUX_URL", "http://influxdb:8086")
-INFLUX_TOKEN   = os.getenv("INFLUX_TOKEN", "")
-INFLUX_ORG     = os.getenv("INFLUX_ORG", "veeam-org")
-INFLUX_BUCKET  = os.getenv("INFLUX_BUCKET", "veeam")
+INFLUX_URL = os.getenv("INFLUX_URL", "http://influxdb:8086")
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN", "")
+INFLUX_ORG = os.getenv("INFLUX_ORG", "veeam-org")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "veeam")
 
 COLLECT_INTERVAL = int(os.getenv("COLLECT_INTERVAL", "300"))
 
@@ -44,7 +44,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ============================================================
-# Veeam API
+# Veeam API - FIXED ENDPOINTS
 # ============================================================
 class VeeamAPI:
     def __init__(self):
@@ -54,16 +54,22 @@ class VeeamAPI:
         self.session.verify = False
 
     def authenticate(self):
-        url = f"{VEEAM_HOST}/api/v1/token"
+        # ✅ FIX: Dùng đúng endpoint oauth2
+        url = f"{VEEAM_HOST}/api/oauth2/token"
         data = f"grant_type=password&username={VEEAM_USER}&password={VEEAM_PASS}"
-        resp = self.session.post(url, headers={**self.headers, "Content-Type": "application/x-www-form-urlencoded"}, data=data)
+        resp = self.session.post(
+            url, 
+            headers={**self.headers, "Content-Type": "application/x-www-form-urlencoded"}, 
+            data=data
+        )
         resp.raise_for_status()
         self.token = resp.json()["access_token"]
         self.headers["Authorization"] = f"Bearer {self.token}"
         log.info("✅ Đăng nhập Veeam API thành công")
 
     def get(self, path, params=None):
-        url = f"{VEEAM_HOST}/api/v1{path}"
+        # ✅ FIX: path đã bao gồm /api/v1/ từ caller
+        url = f"{VEEAM_HOST}{path}"
         resp = self.session.get(url, headers=self.headers, params=params)
         if resp.status_code == 401:
             log.warning("Token hết hạn, đăng nhập lại...")
@@ -73,17 +79,20 @@ class VeeamAPI:
         return resp.json()
 
     def get_jobs(self):
-        return self.get("/jobs").get("data", [])
+        # ✅ FIX: đúng path từ swagger
+        return self.get("/api/v1/jobs").get("data", [])
 
-    def get_job_sessions(self, limit=200):
-        return self.get("/jobSessions", params={"limit": limit}).get("data", [])
+    def get_sessions(self, limit=200):
+        # ✅ FIX: /api/v1/sessions (không phải /jobSessions)
+        return self.get("/api/v1/sessions", params={"limit": limit}).get("data", [])
 
     def get_repositories(self):
-        return self.get("/backupRepositories").get("data", [])
+        # ✅ FIX: đúng path từ swagger
+        return self.get("/api/v1/backupInfrastructure/repositories").get("data", [])
 
     def get_managed_servers(self):
         try:
-            return self.get("/backupServers").get("data", [])
+            return self.get("/api/v1/backupInfrastructure/managedServers").get("data", [])
         except Exception:
             return []
 
@@ -105,11 +114,7 @@ class InfluxWriter:
 # Metrics Builder
 # ============================================================
 STATUS_MAP = {
-    "Success": 1,
-    "Warning": 2,
-    "Failed":  3,
-    "Running": 0,
-    "None":    -1,
+    "Success": 1, "Warning": 2, "Failed": 3, "Running": 0, "None": -1,
 }
 
 def build_job_points(jobs):
@@ -152,19 +157,19 @@ def build_repo_points(repos):
     points = []
     now = datetime.now(timezone.utc)
     for repo in repos:
-        capacity   = repo.get("capacityGB", 0) or 0
+        capacity = repo.get("capacityGB", 0) or 0
         free_space = repo.get("freeSpaceGB", 0) or 0
         used_space = capacity - free_space
-        used_pct   = round((used_space / capacity * 100), 2) if capacity > 0 else 0
+        used_pct = round((used_space / capacity * 100), 2) if capacity > 0 else 0
 
         p = (
             Point("veeam_repository")
             .tag("repo_name", repo.get("name", "unknown"))
             .tag("repo_type", repo.get("type", "unknown"))
-            .field("capacity_gb",   float(capacity))
+            .field("capacity_gb", float(capacity))
             .field("free_space_gb", float(free_space))
             .field("used_space_gb", float(used_space))
-            .field("used_percent",  used_pct)
+            .field("used_percent", used_pct)
             .time(now)
         )
         points.append(p)
@@ -179,21 +184,21 @@ def collect_once(veeam: VeeamAPI, writer: InfluxWriter):
     try:
         jobs = veeam.get_jobs()
         points += build_job_points(jobs)
-        log.info(f"  📋 Jobs: {len(jobs)}")
+        log.info(f" 📋 Jobs: {len(jobs)}")
     except Exception as e:
         log.error(f"Lỗi lấy jobs: {e}")
 
     try:
-        sessions = veeam.get_job_sessions()
+        sessions = veeam.get_sessions()
         points += build_session_points(sessions)
-        log.info(f"  📁 Sessions: {len(sessions)}")
+        log.info(f" 📁 Sessions: {len(sessions)}")
     except Exception as e:
         log.error(f"Lỗi lấy sessions: {e}")
 
     try:
         repos = veeam.get_repositories()
         points += build_repo_points(repos)
-        log.info(f"  🗄️  Repositories: {len(repos)}")
+        log.info(f" 🗄️ Repositories: {len(repos)}")
     except Exception as e:
         log.error(f"Lỗi lấy repositories: {e}")
 
@@ -203,11 +208,11 @@ def collect_once(veeam: VeeamAPI, writer: InfluxWriter):
 
 def main():
     log.info("🚀 Veeam Collector khởi động...")
-    log.info(f"   Veeam Host : {VEEAM_HOST}")
-    log.info(f"   InfluxDB   : {INFLUX_URL}")
-    log.info(f"   Interval   : {COLLECT_INTERVAL}s")
+    log.info(f" Veeam Host : {VEEAM_HOST}")
+    log.info(f" InfluxDB : {INFLUX_URL}")
+    log.info(f" Interval : {COLLECT_INTERVAL}s")
 
-    veeam  = VeeamAPI()
+    veeam = VeeamAPI()
     writer = InfluxWriter()
 
     # Đăng nhập lần đầu (retry nếu thất bại)
