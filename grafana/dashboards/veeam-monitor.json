@@ -11,12 +11,6 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
         "type": "dashboard"
       }
     ]
@@ -30,8 +24,7 @@
   "panels": [
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -76,10 +69,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Success\")\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Success\")\n  |> count()",
           "refId": "A"
         }
       ],
@@ -88,8 +80,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -134,10 +125,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Warning\")\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Warning\")\n  |> count()",
           "refId": "A"
         }
       ],
@@ -146,8 +136,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -192,10 +181,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Failed\")\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Failed\")\n  |> count()",
           "refId": "A"
         }
       ],
@@ -204,8 +192,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -250,10 +237,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_enabled\")\n  |> filter(fn: (r) => r[\"_value\"] == 1)\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_enabled\")\n  |> filter(fn: (r) => r[\"_value\"] == 1)\n  |> count()",
           "refId": "A"
         }
       ],
@@ -262,8 +248,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -309,10 +294,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"job_type\", \"last_result\"])\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, job_name: r.job_name, job_type: r.job_type, last_result: r.last_result, status: r._value}))",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"job_type\", \"last_result\"])\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, job_name: r.job_name, job_type: r.job_type, last_result: r.last_result, status: r._value}))",
           "refId": "A"
         }
       ],
@@ -338,8 +322,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -395,10 +378,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\n  |> last()\n  |> group(columns: [\"repo_name\"])",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\n  |> last()\n  |> group(columns: [\"repo_name\"])",
           "refId": "A"
         }
       ],
@@ -407,8 +389,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "type": "influxdb"
       },
       "fieldConfig": {
         "defaults": {
@@ -454,10 +435,9 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "type": "influxdb"
           },
-          "query": "from(bucket: veeam)\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"capacity_gb\" || r[\"_field\"] == \"free_space_gb\" || r[\"_field\"] == \"used_space_gb\" || r[\"_field\"] == \"used_percent\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"repo_name\", \"repo_type\"])\n  |> last()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"capacity_gb\" || r[\"_field\"] == \"free_space_gb\" || r[\"_field\"] == \"used_space_gb\" || r[\"_field\"] == \"used_percent\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"repo_name\", \"repo_type\"])\n  |> last()",
           "refId": "A"
         }
       ],
@@ -498,8 +478,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Veeam Backup Monitor - Professional",
-  "uid": "veeam-backup-monitor-pro",
+  "title": "Veeam Backup Monitor - Fixed",
+  "uid": "veeam-backup-monitor-fixed",
   "version": 1,
   "weekStart": ""
 }
