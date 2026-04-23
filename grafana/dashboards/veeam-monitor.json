@@ -29,6 +29,63 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb"
+          },
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"last_result\"])\n  |> last()\n  |> group(columns: [\"last_result\"])\n  |> count()",
+          "refId": "A"
+        }
+      ],
+      "title": "Tổng quan trạng thái Jobs",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "thresholds"
           },
           "mappings": [],
@@ -45,65 +102,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb"
-          },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Success\")\n  |> count()",
-          "refId": "A"
-        }
-      ],
-      "title": "Jobs Thành công",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "yellow",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
+        "h": 8,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
       "id": 2,
@@ -127,123 +128,11 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Warning\")\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\"])\n  |> last()\n  |> count()",
           "refId": "A"
         }
       ],
-      "title": "Jobs Cảnh báo",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb"
-          },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"last_result\"] == \"Failed\")\n  |> count()",
-          "refId": "A"
-        }
-      ],
-      "title": "Jobs Thất bại",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb"
-          },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_enabled\")\n  |> filter(fn: (r) => r[\"_value\"] == 1)\n  |> count()",
-          "refId": "A"
-        }
-      ],
-      "title": "Tổng số Jobs",
+      "title": "Tổng số Jobs đang active",
       "type": "stat"
     },
     {
@@ -277,9 +166,9 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 8
       },
-      "id": 5,
+      "id": 3,
       "options": {
         "footer": {
           "fields": "",
@@ -300,7 +189,7 @@
           "refId": "A"
         }
       ],
-      "title": "Trạng thái tất cả Jobs",
+      "title": "Chi tiết từng Job",
       "transformations": [
         {
           "id": "organize",
@@ -357,9 +246,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 12
+        "y": 16
       },
-      "id": 6,
+      "id": 4,
       "options": {
         "displayMode": "lcd",
         "minVizHeight": 10,
@@ -384,7 +273,7 @@
           "refId": "A"
         }
       ],
-      "title": "Dung lượng Repository",
+      "title": "Dung lượng Repository (%)",
       "type": "bargauge"
     },
     {
@@ -418,9 +307,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 16
       },
-      "id": 7,
+      "id": 5,
       "options": {
         "footer": {
           "fields": "",
@@ -478,8 +367,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Veeam Backup Monitor - Fixed",
-  "uid": "veeam-backup-monitor-fixed",
+  "title": "Veeam Monitor - Robust",
+  "uid": "veeam-robust",
   "version": 1,
   "weekStart": ""
 }
