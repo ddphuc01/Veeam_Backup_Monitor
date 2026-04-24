@@ -79,20 +79,26 @@ class VeeamAPI:
         return resp.json()
 
     def get_jobs(self):
-        # ✅ FIX: đúng path từ swagger
-        return self.get("/api/v1/jobs").get("data", [])
+        # ✅ FIX: Lấy Job States thay vì Jobs tĩnh để khai thác objectsCount
+        return self.get("/api/v1/jobs/states").get("data", [])
 
     def get_sessions(self, limit=200):
         # ✅ FIX: /api/v1/sessions (không phải /jobSessions)
         return self.get("/api/v1/sessions", params={"limit": limit}).get("data", [])
 
     def get_repositories(self):
-        # ✅ FIX: đúng path từ swagger
-        return self.get("/api/v1/backupInfrastructure/repositories").get("data", [])
+        # ✅ FIX: Lấy Repositories States
+        return self.get("/api/v1/backupInfrastructure/repositories/states").get("data", [])
 
     def get_managed_servers(self):
         try:
             return self.get("/api/v1/backupInfrastructure/managedServers").get("data", [])
+        except Exception:
+            return []
+
+    def get_proxies(self):
+        try:
+            return self.get("/api/v1/backupInfrastructure/proxies").get("data", [])
         except Exception:
             return []
 
@@ -122,12 +128,16 @@ def build_job_points(jobs):
     now = datetime.now(timezone.utc)
     for job in jobs:
         last_result = job.get("lastResult", "None")
+        status = job.get("status", "unknown")
+        objects_count = int(job.get("objectsCount", 0)) if job.get("objectsCount") else 0
         p = (
             Point("veeam_job")
             .tag("job_name", job.get("name", "unknown"))
             .tag("job_type", job.get("type", "unknown"))
             .tag("last_result", last_result)
-            .field("is_enabled", 1 if job.get("isEnabled") else 0)
+            .tag("status", status)
+            .field("is_enabled", 0 if status == "Disabled" else 1)
+            .field("objects_count", objects_count)
             .field("status_code", STATUS_MAP.get(last_result, -1))
             .time(now)
         )
@@ -157,9 +167,10 @@ def build_repo_points(repos):
     points = []
     now = datetime.now(timezone.utc)
     for repo in repos:
-        capacity = repo.get("capacityGB", 0) or 0
-        free_space = repo.get("freeSpaceGB", 0) or 0
-        used_space = capacity - free_space
+        # repository/states đổi tên biến (bỏ hậu tố GB)
+        capacity = repo.get("capacity", 0) or 0
+        free_space = repo.get("freeSpace", 0) or 0
+        used_space = repo.get("usedSpace", capacity - free_space)
         used_pct = round((used_space / capacity * 100), 2) if capacity > 0 else 0
 
         p = (
@@ -169,7 +180,36 @@ def build_repo_points(repos):
             .field("capacity_gb", float(capacity))
             .field("free_space_gb", float(free_space))
             .field("used_space_gb", float(used_space))
-            .field("used_percent", used_pct)
+            .field("used_percent", float(used_pct))
+            .time(now)
+        )
+        points.append(p)
+    return points
+
+def build_proxy_points(proxies):
+    points = []
+    now = datetime.now(timezone.utc)
+    for px in proxies:
+        p = (
+            Point("veeam_proxy")
+            .tag("proxy_name", px.get("name", "unknown"))
+            .tag("proxy_type", px.get("type", "unknown"))
+            .field("max_tasks", px.get("server", {}).get("maxTasksCount", 0) if px.get("server") else 0)
+            .field("status_code", 1)  # Giả định tồn tại
+            .time(now)
+        )
+        points.append(p)
+    return points
+
+def build_server_points(servers):
+    points = []
+    now = datetime.now(timezone.utc)
+    for sv in servers:
+        p = (
+            Point("veeam_managed_server")
+            .tag("server_name", sv.get("name", "unknown"))
+            .tag("server_type", sv.get("type", "unknown"))
+            .field("status_code", 1)
             .time(now)
         )
         points.append(p)
@@ -201,6 +241,20 @@ def collect_once(veeam: VeeamAPI, writer: InfluxWriter):
         log.info(f" 🗄️ Repositories: {len(repos)}")
     except Exception as e:
         log.error(f"Lỗi lấy repositories: {e}")
+
+    try:
+        proxies = veeam.get_proxies()
+        points += build_proxy_points(proxies)
+        log.info(f" 🛡️ Backup Proxies: {len(proxies)}")
+    except Exception as e:
+        log.error(f"Lỗi lấy proxies: {e}")
+
+    try:
+        servers = veeam.get_managed_servers()
+        points += build_server_points(servers)
+        log.info(f" 🖥️ Managed Servers: {len(servers)}")
+    except Exception as e:
+        log.error(f"Lỗi lấy managed servers: {e}")
 
     if points:
         writer.write(points)

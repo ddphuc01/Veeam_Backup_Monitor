@@ -145,8 +145,8 @@ def print_repos(repos):
     print(f"  {'─'*62}")
     for r in repos:
         name  = r.get("name", "?")[:29]
-        cap   = r.get("capacityGB", 0) or 0
-        free  = r.get("freeSpaceGB", 0) or 0
+        cap   = r.get("capacity", 0) or 0
+        free  = r.get("freeSpace", 0) or 0
         used  = cap - free
         pct   = round(used / cap * 100, 1) if cap > 0 else 0
         color = RED if pct > 85 else (YELLOW if pct > 70 else GREEN)
