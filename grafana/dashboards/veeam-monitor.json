@@ -40,7 +40,42 @@
           },
           "mappings": []
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_result"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Success": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "Warning": {
+                        "color": "yellow",
+                        "index": 1
+                      },
+                      "Failed": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "None": {
+                        "color": "gray",
+                        "index": 3
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -51,10 +86,10 @@
       "id": 1,
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "displayMode": "table",
+          "placement": "right"
         },
-        "pieType": "pie",
+        "pieType": "donut",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -72,7 +107,7 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"last_result\"])\n  |> last()\n  |> group(columns: [\"last_result\"])\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\"])\n  |> last()\n  |> group(columns: [\"last_result\"])\n  |> count()",
           "refId": "A"
         }
       ],
@@ -109,8 +144,8 @@
       },
       "id": 2,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
+        "colorMode": "background",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -118,7 +153,7 @@
             "lastNotNull"
           ],
           "fields": "",
-          "values": false
+          "values": true
         },
         "textMode": "auto"
       },
@@ -128,7 +163,7 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\"])\n  |> last()\n  |> count()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\"])\n  |> last()\n  |> group()\n  |> count()",
           "refId": "A"
         }
       ],
@@ -160,7 +195,46 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kết quả"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Success": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "Warning": {
+                        "color": "yellow",
+                        "index": 1
+                      },
+                      "Failed": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "None": {
+                        "color": "gray",
+                        "index": 3
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -185,7 +259,7 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"job_type\", \"last_result\"])\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, job_name: r.job_name, job_type: r.job_type, last_result: r.last_result, status: r._value}))",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_job\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status_code\")\n  |> group(columns: [\"job_name\", \"job_type\", \"last_result\"])\n  |> last()\n  |> group()\n  |> keep(columns: [\"_time\", \"job_name\", \"job_type\", \"last_result\", \"_value\"])",
           "refId": "A"
         }
       ],
@@ -259,7 +333,7 @@
             "lastNotNull"
           ],
           "fields": "",
-          "values": false
+          "values": true
         },
         "showUnfilled": true
       },
@@ -269,7 +343,7 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\n  |> last()\n  |> group(columns: [\"repo_name\"])",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\n  |> group(columns: [\"repo_name\"])\n  |> last()\n  |> group()\n  |> keep(columns: [\"repo_name\", \"_value\"])",
           "refId": "A"
         }
       ],
@@ -301,7 +375,28 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Usage %"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "lcd-gauge"
+              },
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -326,7 +421,7 @@
           "datasource": {
             "type": "influxdb"
           },
-          "query": "from(bucket: \"veeam\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"capacity_gb\" || r[\"_field\"] == \"free_space_gb\" || r[\"_field\"] == \"used_space_gb\" || r[\"_field\"] == \"used_percent\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"repo_name\", \"repo_type\"])\n  |> last()",
+          "query": "from(bucket: \"veeam\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_repository\")\n  |> filter(fn: (r) => r[\"_field\"] == \"capacity_gb\" or r[\"_field\"] == \"free_space_gb\" or r[\"_field\"] == \"used_space_gb\" or r[\"_field\"] == \"used_percent\")\n  |> group(columns: [\"repo_name\", \"repo_type\", \"_field\"])\n  |> last()\n  |> group()\n  |> pivot(rowKey:[\"repo_name\", \"repo_type\"], columnKey: [\"_field\"], valueColumn: \"_value\")",
           "refId": "A"
         }
       ],
