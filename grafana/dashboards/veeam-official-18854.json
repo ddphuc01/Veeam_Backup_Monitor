@@ -88,7 +88,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "description": "",
       "fieldConfig": {
@@ -230,7 +230,7 @@
           "alias": "$tag_veeamBackupSessionsName",
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "groupBy": [
             {
@@ -296,7 +296,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "hide": false,
           "query": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_sessions\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"veeamVBRSessionsJobResult\")\r\n  |> filter(fn: (r) => r[\"_value\"] == 2) \r\n  |> filter(fn: (r) => r[\"veeamVBRSessionJobName\"] =~ /${vbrjobs:regex}/)\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] =~ /${vbrserver:regex}/)\r\n  |> window(every: 24h)\r\n  |> count() \r\n  |> group()\r\n",
@@ -305,7 +305,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "hide": false,
           "query": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_sessions\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"veeamVBRSessionsJobResult\")\r\n  |> filter(fn: (r) => r[\"_value\"] == 3) \r\n  |> filter(fn: (r) => r[\"veeamVBRSessionJobName\"] =~ /${vbrjobs:regex}/)\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] =~ /${vbrserver:regex}/)\r\n  |> window(every: 24h)\r\n  |> count() \r\n  |> group()\r\n",
@@ -319,7 +319,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "description": "",
       "fieldConfig": {
@@ -473,7 +473,7 @@
           "alias": "$tag_veeamBackupSessionsName",
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "groupBy": [
             {
@@ -596,7 +596,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "description": "",
       "fieldConfig": {
@@ -727,7 +727,7 @@
           "alias": "$tag_veeamBackupSessionsName",
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "groupBy": [
             {
@@ -811,7 +811,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "description": "",
       "fieldConfig": {
@@ -899,7 +899,7 @@
           "alias": "$tag_veeamBackupSessionsName",
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "groupBy": [
             {
@@ -982,7 +982,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "fieldConfig": {
         "defaults": {
@@ -1066,7 +1066,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "query": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_managedservers\")\r\n  |> filter(fn: (r) => r[\"veeamVBRMSName\"] =~ /${vbrmanaged:regex}/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"veeamVBRMSInternalID\")\r\n  |> group(columns: [\"veeamVBRMSName\"])\r\n  |> last()",
           "refId": "A"
@@ -1117,7 +1117,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "fieldConfig": {
         "defaults": {
@@ -1235,7 +1235,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "query": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_proxies\")\r\n  |> filter(fn: (r) => r[\"veeamVBRProxyName\"] =~ /${vbrproxies:regex}/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"veeamVBRProxyTask\")\r\n  |> group(columns: [\"veeamVBRProxyName\"])\r\n  |> last()",
           "refId": "A"
@@ -1293,7 +1293,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "fieldConfig": {
         "defaults": {
@@ -1450,7 +1450,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "query": "  from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_repositories\")\r\n  |> filter(fn: (r) => r[\"veeamVBRRepoName\"] =~ /${vbrrepositories:regex}/)\r\n  |> group(columns: [\"veeamVBRRepoName\"])\r\n  |> last()\r\n  |> yield(name: \"last\")\r\n",
           "refId": "A"
@@ -1538,7 +1538,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "${DS_INFLUXDB}"
+        "uid": "InfluxDB-Veeam"
       },
       "description": "",
       "fieldConfig": {
@@ -1607,7 +1607,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
+            "uid": "InfluxDB-Veeam"
           },
           "query": "  from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_backupobjects\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"restorePointsCount\")\r\n    |> filter(fn: (r) => r[\"veeamVBRBobjectName\"] =~ /${vbrprotected:regex}/)\r\n  |> group(columns: [\"veeamVBRBobjectName\"])\r\n  |> last()\r\n  |> yield(name: \"last\")\r\n",
           "refId": "A"
@@ -1698,7 +1698,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_info\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] != \"\")\r\n  |> keep(columns: [\"veeamVBR\"])\r\n  |> distinct(column: \"veeamVBR\")\r\n  |> group()",
         "hide": 0,
@@ -1718,7 +1718,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_sessions\")\r\n  |> filter(fn: (r) => r[\"veeamVBRSessionJobName\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRSessionJobName\"])\r\n  |> distinct(column: \"veeamVBRSessionJobName\")\r\n  |> group()",
         "hide": 0,
@@ -1738,7 +1738,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_managedservers\")\r\n  |> filter(fn: (r) => r[\"veeamVBRMSName\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRMSName\"])\r\n  |> distinct(column: \"veeamVBRMSName\")\r\n  |> group()",
         "hide": 0,
@@ -1758,7 +1758,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_repositories\")\r\n  |> filter(fn: (r) => r[\"veeamVBRRepoName\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRRepoName\"])\r\n  |> distinct(column: \"veeamVBRRepoName\")\r\n  |> group()",
         "hide": 0,
@@ -1778,7 +1778,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_proxies\")\r\n  |> filter(fn: (r) => r[\"veeamVBRProxyName\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRProxyName\"])\r\n  |> distinct(column: \"veeamVBRProxyName\")\r\n  |> group()",
         "hide": 0,
@@ -1798,7 +1798,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_backupobjects\")\r\n  |> filter(fn: (r) => r[\"veeamVBRBobjectName\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRBobjectName\"])\r\n  |> distinct(column: \"veeamVBRBobjectName\")\r\n  |> group()",
         "hide": 0,
@@ -1818,7 +1818,7 @@
         "current": {},
         "datasource": {
           "type": "influxdb",
-          "uid": "${DS_INFLUXDB}"
+          "uid": "InfluxDB-Veeam"
         },
         "definition": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"veeam_vbr_info\")\r\n  |> filter(fn: (r) => r[\"veeamVBRVersion\"] != \"\")\r\n  |> filter(fn: (r) => r[\"veeamVBR\"] == \"${vbrserver}\")\r\n  |> keep(columns: [\"veeamVBRVersion\"])\r\n  |> distinct(column: \"veeamVBRVersion\")\r\n  |> group()",
         "hide": 2,
