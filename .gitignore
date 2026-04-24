@@ -1,71 +1,7 @@
-```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-dist/
-build/
-target/
+# Grafana dashboard JSON files are typically source/config files
+# No build artifacts, dependencies, or temp files detected in changes
+# Empty .gitignore is appropriate for this case
 
-# Dependencies
-.venv/
-venv/
-node_modules/
-.mypy_cache/
-.pytest_cache/
-.coverage
-coverage/
-htmlcov/
-.gradle/
+```json
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Environment
-.env
-.env.local
-.env.*
-
-# Editors and IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Common compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
 ```
