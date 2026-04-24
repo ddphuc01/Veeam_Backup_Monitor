@@ -1,6 +1,6 @@
 # 🟢 Veeam Backup Monitor - Grafana Stack
 
-Monitor Veeam Backup & Replication 11 với Grafana + InfluxDB.
+Monitor Veeam Backup & Replication với Grafana + InfluxDB.
 
 ## 📁 Cấu trúc thư mục
 
@@ -11,7 +11,8 @@ veeam-grafana/
 ├── collector/
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── collector.py          ← Script thu thập data từ Veeam API
+│   ├── collector.py          ← Script thu thập data từ Veeam API (Python)
+│   └── veeam_backup_and_replication.sh  ← Script bash từ VeeamHub (tham khảo)
 └── grafana/
     ├── provisioning/
     │   ├── datasources/
@@ -19,10 +20,11 @@ veeam-grafana/
     │   └── dashboards/
     │       └── dashboard.yml
     └── dashboards/
-        └── veeam-monitor.json
+        ├── veeam-monitor.json            ← Dashboard gốc (đơn giản)
+        └── veeam-backup-replication.json ← Dashboard từ VeeamHub (chi tiết)
 ```
 
-## 🚀 Cài đặt
+## 🚀 Cài đặt nhanh
 
 ### Bước 1: Chuẩn bị file .env
 ```bash
@@ -51,7 +53,9 @@ Username : admin
 Password : (xem file .env - GRAFANA_PASSWORD)
 ```
 
-Dashboard sẽ nằm trong folder **Veeam** → **Veeam Backup Monitor**
+Dashboard sẽ nằm trong folder **Veeam Dashboards**:
+- **Veeam Backup Monitor** (đơn giản, Python collector)
+- **Grafana Dashboard for Veeam Backup & Replication** (chi tiết, từ VeeamHub)
 
 ---
 
@@ -79,6 +83,24 @@ Truy cập: `http://localhost:8086`
 
 ---
 
+## 📊 Dashboard từ VeeamHub
+
+Dự án này đã tích hợp dashboard chính thức từ [VeeamHub/grafana](https://github.com/VeeamHub/grafana/tree/master/veeam-backup-and-replication-grafana):
+
+- File: `grafana/dashboards/veeam-backup-replication.json`
+- Dashboard này yêu cầu dữ liệu từ script `veeam_backup_and_replication.sh` (bash)
+- Script bash đã được tải về trong thư mục `collector/` để tham khảo
+
+### Lưu ý quan trọng:
+- **Collector hiện tại (Python)**: Thu thập metrics cơ bản cho dashboard `veeam-monitor.json`
+- **Script bash từ VeeamHub**: Cần chạy riêng nếu muốn dùng dashboard đầy đủ từ VeeamHub
+- Để sử dụng dashboard VeeamHub, bạn cần:
+  1. Chỉnh sửa `collector/veeam_backup_and_replication.sh` với thông tin Veeam của bạn
+  2. Chạy script này trên máy host hoặc trong container riêng
+  3. Đảm bảo dữ liệu ghi vào cùng InfluxDB bucket `veeam`
+
+---
+
 ## 🐛 Troubleshoot
 
 ```bash
@@ -91,3 +113,10 @@ docker logs veeam-collector --tail 50
 # Kiểm tra kết nối từ collector tới Veeam
 docker exec veeam-collector curl -k https://<veeam-ip>:9419/api/v1/token
 ```
+
+---
+
+## 📄 Tài liệu tham khảo
+
+- [VeeamHub Dashboard gốc](https://github.com/VeeamHub/grafana/tree/master/veeam-backup-and-replication-grafana)
+- [Blog hướng dẫn chi tiết](https://jorgedelacruz.uk/2023/05/31/looking-for-the-perfect-dashboard-influxdb-telegraf-and-grafana-part-xliv-monitoring-veeam-backup-replication-api/)
